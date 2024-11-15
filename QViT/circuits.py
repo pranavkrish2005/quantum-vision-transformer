@@ -1,5 +1,6 @@
 import torch.nn as nn
 import numpy as np
+import jax.numpy as jnp
 import tensorcircuit as tc
 import torch
 from jax import pmap
@@ -7,42 +8,26 @@ from jax.numpy import array
 ####################################### Shared Func
 
 # Wrapper to turn quantum circuits to functions with gradients
-# this simualtes a quantum circuit with gradients and uses that
+
 class QLayer(nn.Module):
-    def circuit_to_func(self, K, quantum_circuit, nqubits):
-        def f(inputs, parameters):
-            return quantum_circuit(inputs, parameters, nqubits)
+    
+    def circuit_to_func(self,K,quantum_circuit,nqubits):
+        def f(inputs,parameters):
+            return quantum_circuit(inputs,parameters,nqubits)
+
         f_vmap = K.vmap(f, vectorized_argnums=0)
         f_batch = tc.interfaces.torch_interface(f_vmap, jit=True)
+
         return f_batch
 
-    def __init__(self, quantum_circuit, par_sizes, nqubits):
-        super(QLayer, self).__init__()
+    def __init__(self,quantum_circuit,par_sizes,nqubits):
+        super(QLayer,self).__init__()
         self.backend = tc.set_backend("jax")
-        self.w = nn.Parameter(torch.normal(0, 1/par_sizes[-1]**.5*torch.ones(par_sizes)))
-        self.quantum_circuit = quantum_circuit  # Store the circuit function
-        self.nqubits = nqubits  # Store number of qubits
-        self.f = self.circuit_to_func(self.backend, quantum_circuit, nqubits)
+        self.w = nn.Parameter(torch.normal(0,1/par_sizes[-1]**.5*torch.ones(par_sizes)) )
+        self.f = self.circuit_to_func(self.backend,quantum_circuit,nqubits)
+    def forward(self,input1):
+        return self.f(input1,self.w)
 
-    def print_circuit(self):
-        circuit = tc.Circuit(self.nqubits)
-        sample_data = torch.zeros(self.nqubits)
-        sample_params = torch.zeros_like(self.w[0]) if len(self.w.shape) > 1 else torch.zeros_like(self.w)
-        
-        # If it's a measure_value circuit
-        if self.quantum_circuit == measure_value:
-            encode_token(circuit, sample_data, self.nqubits)
-            v_ansatz(circuit, sample_data, sample_params, self.nqubits)
-            
-        # If it's a measure_query_key circuit
-        elif self.quantum_circuit == measure_query_key:
-            encode_token(circuit, sample_data, self.nqubits)
-            qk_ansatz(circuit, sample_data, sample_params, self.nqubits)
-            
-        print(circuit.draw())
-
-    def forward(self, input1):
-        return self.f(input1, self.w)
 
 
 ########################################### Circuits in the first method
@@ -206,12 +191,86 @@ def compute_attention(alphas,norms,compute_element):
 
 ################################################################################# Circuits used in the second method
 
+#Original encode function (basic encode):
 
 def encode_token(circuit,data,nqubits):
-    for i in range(nqubits):
-        circuit.H(i)
-        circuit.rx(i,theta = data[i])
+
+    """
+        Basic encoding strategy: Hadamard + Rx rotation
         
+        This encoding:
+        1. Applies Hadamard to create superposition
+        2. Rotates around X-axis based on input data
+        
+        Example for 2 qubits with data [0.5, 1.0]:
+        |0⟩ --H--Rx(0.5)--
+        |0⟩ --H--Rx(1.0)--
+    """
+
+    for i in range(nqubits):
+        circuit.H(i) # Create superposition
+        circuit.rx(i,theta = data[i]) # Rotate based on data
+
+#OUR NEW ENCODING FUNCTIONS:
+
+def amplitude_encode(circuit, data, nqubits):
+        """
+        Amplitude encoding strategy: Maps data to quantum amplitudes
+        
+        This encoding:
+        1. Normalizes input data to ensure valid quantum state
+        2. Uses Rx and Ry rotations to encode data in amplitudes
+        
+        Example for 2 qubits with data [0.8, 0.6]:
+        Normalized = [0.8/√1.0, 0.6/√1.0]
+        |0⟩ --H--Rx(arcsin(0.8))--Ry(arccos(0.8))--
+        |0⟩ --H--Rx(arcsin(0.6))--Ry(arccos(0.6))--
+        """
+        # Normalize data to ensure valid quantum state
+        normalized_data = data / jnp.linalg.norm(data) 
+        
+        for i in range(nqubits):
+            circuit.H(i)  # Create superposition
+            # Encode amplitude in both X and Y rotations
+            circuit.rx(i, theta=jnp.arcsin(normalized_data[i]))
+            circuit.ry(i, theta=jnp.arccos(normalized_data[i]))
+
+def phase_encode(circuit, data, nqubits):
+        """
+        Phase encoding strategy: Encodes data in quantum phases
+        
+        This encoding:
+        1. Creates superposition with Hadamard
+        2. Applies phase rotation based on data
+        
+        Example for 2 qubits with data [0.5, 1.0]:
+        |0⟩ --H--Rz(0.5)--
+        |0⟩ --H--Rz(1.0)--
+        """
+        for i in range(nqubits):
+            circuit.H(i)  # Create superposition
+            circuit.rz(i, theta=data[i])  # Encode in phase
+
+def dense_angle_encode(circuit, data, nqubits):
+        """
+        Dense angle encoding: Uses all three rotation angles
+        
+        This encoding:
+        1. Applies all three rotation gates (Rx, Ry, Rz)
+        2. Enables encoding 3 data points per qubit
+        
+        Example for 1 qubit with data [0.5, 1.0, 0.7]:
+        |0⟩ --Rx(0.5)--Ry(1.0)--Rz(0.7)--
+        """
+        for i in range(nqubits):
+            idx = i * 3
+            if idx < len(data):
+                circuit.rx(i, theta=data[idx])
+            if idx + 1 < len(data):
+                circuit.ry(i, theta=data[idx + 1])
+            if idx + 2 < len(data):
+                circuit.rz(i, theta=data[idx + 2])
+#____________________________________________________
         
 # def qkv_ansatz(c,data,parameters,nqubits):
 
@@ -272,12 +331,20 @@ def v_ansatz(circuits,data,parameters,nqubits):
         
 def measure_query_key(data,parameters,nqubits):
     circuit=tc.Circuit(nqubits)
-    encode_token(circuit,data,nqubits)
+    #encode_token(circuit,data,nqubits) #The following lines can be changed to a different encode function
+    #amplitude_encode(circuit,data,nqubits)
+    phase_encode(circuit, data, nqubits)
+    #dense_angle_encode(circuit, data, nqubits)
+
     qk_ansatz(circuit,data,parameters,nqubits)
     return (circuit.expectation_ps(z=[0]) ).real
 
 def measure_value(data,parameters,nqubits):
     circuit=tc.Circuit(nqubits)
-    encode_token(circuit,data,nqubits)
+    #encode_token(circuit,data,nqubits) #This following lines can be changed to a different encode function 
+    #amplitude_encode(circuit,data,nqubits)
+    phase_encode(circuit, data, nqubits)
+    #dense_angle_encode(circuit, data, nqubits)
+
     v_ansatz(circuit,data,parameters,nqubits)
     return array([circuit.expectation_ps(z=[i]).real for i in range(nqubits)])
