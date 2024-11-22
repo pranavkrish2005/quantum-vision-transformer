@@ -12,27 +12,56 @@ The primary goals of this project include:
 Our hope is to improve HViT to be better than existing Classical Vision Transformer models.
 
 ### Quantum Advantage
-Quantum machine learning provides unique advantages for this problem by enabling efficient data encoding and representation, reducing the classical model's dependency on large-scale data. Quantum encodings such as phase and amplitude encoding allow for better preservation of data relationships and facilitate more complex pattern recognition tasks. Using quantum circuits in attention mechanism of a transformer model offers several advantages over classical methods. Quantum circuits can process all possible states of the input data simultaneously due to superposition and Quantum entanglement enables encoding correlations between data features more naturally allowing for Enhanced Representational Power, Efficient Encoding of High-Dimensional Data and Improved Contextual Understanding.
+Quantum machine learning provides unique advantages for this problem by enabling efficient data encoding and representation, reducing the classical model's dependency on large-scale data. Quantum encodings such as phase and amplitude encoding allow for better preservation of data relationships and facilitate more complex pattern recognition tasks. Using quantum circuits in attention mechanism of a transformer model offers several advantages over classical methods.
+
+Quantum circuits can process all possible states of the input data simultaneously due to superposition and Quantum entanglement enables encoding correlations between data features more naturally allowing for Enhanced Representational Power, Efficient Encoding of High-Dimensional Data and Improved Contextual Understanding.
 
 ---
 
 ## 2. Methods
 ### Quantum Computing Framework
-This project utilizes Qiskit as the primary quantum computing framework for designing and simulating quantum circuits.
-
+The project employs Qiskit, a robust open-source quantum computing framework, for designing, simulating, and integrating quantum circuits into the model architecture. Classical components of the transformer model are implemented using PyTorch.
 #### Model Architecture
-The HViT model integrates quantum encoding within a classical transformer architecture. Key components include:
+The HViT model is a hybrid quantum-classical architecture inspired by the Vision Transformer (ViT). It incorporates quantum encoders for input feature mapping and classical components for downstream processing. The key components include:
 
-Quantum encoders for input feature mapping.
-Classical feed-forward neural networks for processing encoded data.
-Hybrid attention mechanisms using quantum-enhanced Keys, Values, and Queries.
+- Quantum Encoding Layer: Encodes classical data into quantum states using various encoding methods.
+- Attention Mechanism: Quantum-enhanced Keys, Values, and Queries improve attention map quality by leveraging entanglement and interference.
+- Feed-Forward Neural Network: A classical neural network processes encoded and attended features to generate predictions.
+
 #### Quantum Algorithms and Circuits
-The project incorporates several quantum encoding techniques, implemented in the circuits.py file:
-
-Original Encoding (Hadamard + Rx Rotation): Creates superposition and applies rotations based on input data.
-Amplitude Encoding: Maps data to quantum amplitudes for enhanced data relationships.
-Phase Encoding: Encodes input in quantum phases, suitable for interference-based tasks.
-Dense Angle Encoding: Utilizes all three rotation gates (Rx, Ry, Rz) for maximum data density.
+The project incorporates 3 new quantum encoding techniques, implemented in the circuits.py file:
+- **Original Encoding**: Implemented in function (encode_token) Consists of a Hadamard + Rx rotation on the input data and is 1 data point per qubit.
+This encoding:
+  1. Applies Hadamard to create superposition
+  2. Rotates around X-axis based on input data
+        
+  Example for 2 qubits with data [0.5, 1.0]:
+  |0⟩ --H--Rx(0.5)--
+  |0⟩ --H--Rx(1.0)--
+- **Amplitude Encoding**: New encoding implemented in function (amplitude_encode) Maps data to quantum amplitudes. It consists of 2 data points per qubit. It is good for better preservation of data relationships and more precise control over the quantum state.
+This encoding:
+  1. Normalizes input data to ensure valid quantum state
+  2. Uses Rx and Ry rotations to encode data in amplitudes
+        
+  Example for 2 qubits with data [0.8, 0.6]:
+  Normalized = [0.8/√1.0, 0.6/√1.0]
+  |0⟩ --H--Rx(arcsin(0.8))--Ry(arccos(0.8))--
+  |0⟩ --H--Rx(arcsin(0.6))--Ry(arccos(0.6))--
+- **Phase Encoding**: New encoding implemented in function (phase_encode) Encodes data in quantum phases. It consists of 1 data point per qubit. It is good for pattern recognition tasks and interference-based algorithms. Note that this is the encoding function being run in the current code.
+This encoding:
+  1. Creates superposition with Hadamard
+  2. Applies phase rotation based on data
+        
+  Example for 2 qubits with data [0.5, 1.0]:
+  |0⟩ --H--Rz(0.5)--
+  |0⟩ --H--Rz(1.0)--
+- **Dense Angle Encoding**: New encoding implemented in function (dense_angle_encode), whcih uses all three rotation angles. It consists of 3 data points per qubit. It is good for maximum data density, more efficient use of resources, and better for complex data patterns. 
+This encoding:
+  1. Applies all three rotation gates (Rx, Ry, Rz)
+  2. Enables encoding 3 data points per qubit
+        
+  Example for 1 qubit with data [0.5, 1.0, 0.7]:
+  |0⟩ --Rx(0.5)--Ry(1.0)--Rz(0.7)--
 
 ---
 
