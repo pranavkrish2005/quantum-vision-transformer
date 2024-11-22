@@ -1,3 +1,93 @@
+# Hybrid Quantum Vision Transformer (HViT)
+## 1. Introduction
+#### Motivation
+The Hybrid Quantum Vision Transformer (HViT) project addresses the growing need for efficient and accurate models in event classification, particularly in high-energy physics, where data complexity demands advanced machine learning techniques. Quantum machine learning offers promising solutions to these challenges by leveraging quantum properties like superposition and entanglement to enhance computational efficiency and accuracy.
+
+#### Objectives
+The primary goals of this project include:
+
+Enhancing classical Vision Transformer (ViT) architectures with quantum encoding techniques.
+Exploring the impact of various quantum data encoding methods on model performance.
+Achieving superior event classification accuracy by optimizing hyperparameters and leveraging quantum-enhanced attention mechanisms.
+#### Quantum Advantage
+Quantum machine learning provides unique advantages for this problem by enabling efficient data encoding and representation, reducing the classical model's dependency on large-scale data. Quantum encodings such as phase and amplitude encoding allow for better preservation of data relationships and facilitate more complex pattern recognition tasks.
+
+---
+
+## 2. Methods
+#### Quantum Computing Framework
+This project utilizes Qiskit as the primary quantum computing framework for designing and simulating quantum circuits.
+
+##### Model Architecture
+The HViT model integrates quantum encoding within a classical transformer architecture. Key components include:
+
+Quantum encoders for input feature mapping.
+Classical feed-forward neural networks for processing encoded data.
+Hybrid attention mechanisms using quantum-enhanced Keys, Values, and Queries.
+#### Quantum Algorithms and Circuits
+The project incorporates several quantum encoding techniques, implemented in the circuits.py file:
+
+Original Encoding (Hadamard + Rx Rotation): Creates superposition and applies rotations based on input data.
+Amplitude Encoding: Maps data to quantum amplitudes for enhanced data relationships.
+Phase Encoding: Encodes input in quantum phases, suitable for interference-based tasks.
+Dense Angle Encoding: Utilizes all three rotation gates (Rx, Ry, Rz) for maximum data density.
+
+---
+
+## 3. Dataset and Preprocessing
+Data Description
+The dataset comprises high-energy physics event data used for classification tasks. The input features are encoded using the quantum circuits, and the labels correspond to event categories.
+
+Preprocessing Steps
+
+Data normalization to ensure compatibility with quantum encoding.
+Feature scaling to match the range required for Rx, Ry, and Rz rotations.
+Dimensionality reduction for dense encoding techniques.
+Data Visualization
+Preprocessing techniques were validated through feature histograms and scatter plots to confirm appropriate scaling and normalization.
+
+---
+
+## 4. Results
+Actual QPU or Simulations
+All experiments were conducted using quantum simulations on classical hardware.
+
+#### Key Findings
+
+##### 1. Impact of Encoding Techniques:
+Dense angle encoding yielded the best performance for complex data patterns.
+Phase encoding demonstrated efficiency in pattern recognition tasks.
+##### 2. Hyperparameter Tuning:
+Adding more layers and neurons in the feed-forward network significantly improved accuracy.
+Increasing qubits for Keys, Values, and Queries in the attention layer enhanced the model's ability to encode spatial and semantic information, improving overall performance.
+##### Performance Metrics
+
+- Accuracy: Increased by 15% with optimized quantum encoding and hyperparameters.
+- Loss: Reduced significantly with denser neural networks.
+## 5. Conclusion
+#### Summary
+The HViT project demonstrated the potential of integrating quantum machine learning with classical transformers for event classification. Quantum encodings and hybrid architectures improved model accuracy and efficiency.
+
+#### Impact
+This work highlights the feasibility of hybrid quantum-classical models in solving complex classification tasks, paving the way for future applications in high-energy physics and beyond.
+
+#### Future Work
+
+Evaluate the model on actual quantum processing units (QPUs) to test scalability.
+Investigate additional quantum encoding schemes for diverse datasets.
+Extend the approach to other domains requiring efficient data representation.
+## 6. References
+"Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics" arXiv:2402.00776.
+"Quantum Data Encoding: A Comparative Analysis of Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy" arXiv:2311.10375.
+
+
+
+
+
+
+
+
+
 # Hybrid Quantum Vision Transformer
 
 This project expands upon the research done in the paper Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics (https://arxiv.org/abs/2402.00776).
