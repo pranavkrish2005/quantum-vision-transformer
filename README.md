@@ -1,24 +1,26 @@
 # Hybrid Quantum Vision Transformer (HViT)
 ## 1. Introduction
-#### Motivation
-The Hybrid Quantum Vision Transformer (HViT) project addresses the growing need for efficient and accurate models in event classification, particularly in high-energy physics, where data complexity demands advanced machine learning techniques. Quantum machine learning offers promising solutions to these challenges by leveraging quantum properties like superposition and entanglement to enhance computational efficiency and accuracy.
 
-#### Objectives
+### Motivation
+The Hybrid Quantum Vision Transformer (HViT) project addresses the need for efficient and accurate models in event classification. Quantum machine learning offers promising solutions to these challenges by leveraging quantum properties like superposition and entanglement to enhance computational efficiency and accuracy. With this project, we hope to improve existing Hybrid Quantum Vision Transformers by making them more accurate and bring them one step closer to existing Classical Vision Transformer models.
+
+### Objectives
 The primary goals of this project include:
+- Enhancing classical Vision Transformer (ViT) architectures with quantum encoding techniques.
+- Exploring the impact of various quantum data encoding methods on model performance.
+- Achieving superior event classification accuracy by optimizing hyperparameters and leveraging quantum-enhanced attention mechanisms.
+Our hope is to improve HViT to be better than existing Classical Vision Transformer models.
 
-Enhancing classical Vision Transformer (ViT) architectures with quantum encoding techniques.
-Exploring the impact of various quantum data encoding methods on model performance.
-Achieving superior event classification accuracy by optimizing hyperparameters and leveraging quantum-enhanced attention mechanisms.
-#### Quantum Advantage
-Quantum machine learning provides unique advantages for this problem by enabling efficient data encoding and representation, reducing the classical model's dependency on large-scale data. Quantum encodings such as phase and amplitude encoding allow for better preservation of data relationships and facilitate more complex pattern recognition tasks.
+### Quantum Advantage
+Quantum machine learning provides unique advantages for this problem by enabling efficient data encoding and representation, reducing the classical model's dependency on large-scale data. Quantum encodings such as phase and amplitude encoding allow for better preservation of data relationships and facilitate more complex pattern recognition tasks. Using quantum circuits in attention mechanism of a transformer model offers several advantages over classical methods. Quantum circuits can process all possible states of the input data simultaneously due to superposition and Quantum entanglement enables encoding correlations between data features more naturally allowing for Enhanced Representational Power, Efficient Encoding of High-Dimensional Data and Improved Contextual Understanding.
 
 ---
 
 ## 2. Methods
-#### Quantum Computing Framework
+### Quantum Computing Framework
 This project utilizes Qiskit as the primary quantum computing framework for designing and simulating quantum circuits.
 
-##### Model Architecture
+#### Model Architecture
 The HViT model integrates quantum encoding within a classical transformer architecture. Key components include:
 
 Quantum encoders for input feature mapping.
@@ -77,8 +79,8 @@ Evaluate the model on actual quantum processing units (QPUs) to test scalability
 Investigate additional quantum encoding schemes for diverse datasets.
 Extend the approach to other domains requiring efficient data representation.
 ## 6. References
-"Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics" arXiv:2402.00776.
-"Quantum Data Encoding: A Comparative Analysis of Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy" arXiv:2311.10375.
+- "Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics" [arXiv:2402.00776](https://arxiv.org/abs/2402.00776).
+- "Quantum Data Encoding: A Comparative Analysis of Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy" [arXiv:2311.10375](https://arxiv.org/pdf/2311.10375).
 
 
 
