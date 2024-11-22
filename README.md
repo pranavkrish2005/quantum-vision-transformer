@@ -2,6 +2,8 @@
 
 This project expands upon the research done in the paper Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics (https://arxiv.org/abs/2402.00776).
 
+
+## Quantum encoding
 The specific changes are made to the quantum circuit located in the circuits.py file. These include 3 additional encoding functions. These additional encoding methids and their benefits are explained in the paper Quantum Data Encoding: A Comparative Analysis of
 Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy (https://arxiv.org/pdf/2311.10375). An outline of these functions are explained below:
 
@@ -42,3 +44,13 @@ This encoding:
   |0⟩ --Rx(0.5)--Ry(1.0)--Rz(0.7)--
 
 
+## Hyperparameter tuning
+  1. increasing the complexity of the free forward Neural Network.
+  Adding more layers and adding more neurons to each layer in the Free Forward Neural Network part of the transformer model, increased the model's accuray and decreased the model loss significantly.
+
+NOTE: We also found that adding more neurons does not make the model better since it becomes prone to overfitting and does not perform well enough for testing data.
+
+  2. Increasing the number of q_bits to caluclate the Key, Value and Query in the attention layer.
+  THe code originally had only 2 qbits and we changed that making it similar to the paper cited above. Just making this simple change resulted in each attention head being able to encode the positioning and meaning of each of the pixel more accurately, increasing the overall performance of the model.
+
+## Circuit Changes
