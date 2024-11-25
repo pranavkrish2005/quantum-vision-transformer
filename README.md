@@ -84,26 +84,75 @@ Impact: Positional encoding remains enabled, allowing the transformer to account
 #### Quantum Circuits
 In this code we introduce a 8 qbit quantum circuit used to calculate the Key, Value and Query for each attention head. This is the basics of a hybrid transformer model and instead of doing matrix multiplication we are able to speed up this process via Superposition and Parallelism. Here are the quantum circuits that we used to calucalte the Key, Value and Query of our attention mechanism:
 
+Key circuit:
+
+![Key circuit](./Images/K_layer.png)
+
+Value circuit:
+
+![Key circuit](./Images/V_layer.png)
+
+Query circuit:
+
+![Key circuit](./Images/Q_layer.png)
+
+This circuit produces the key, value, and query vectors for an attention head by encoding the input data into a highly entangled quantum state through sequential rotation and entanglement gates, which capture complex relationships between input features. The parameterized rotation gates allow for tunable embeddings, while the controlled-X gates introduce correlations essential for generating the contextual dependencies required by attention mechanisms. Here are the gates used and explained:
+1. Initialization with Hadamard Gates (H):
+Purpose: Applies to all qubits to put them into an equal superposition of ∣0⟩ and ∣1⟩.
+Reason: Ensures all computational states are accessible, preparing for interference and entanglement.
+
+3. Sequential Rx Gates:
+Purpose: Adds parameterized rotations about the X-axis. These gates allow fine-tuning of the quantum state.
+Reason: Multiple Rx gates in a row provide flexibility to model complex quantum states.
+Order: Immediately after superposition to build the desired variational state.
+
+5. Ry Gates:
+Purpose: Adds parameterized rotations about the Y-axis to complement the Rx gates.
+Reason: Together, Rx and Ry gates span the Bloch sphere, enabling the circuit to encode any quantum state.
+Order: After Rx gates, to ensure full expressiveness of the variational circuit.
+
+7. Controlled-X Gates (CX or CNOT):
+Purpose: Creates entanglement between qubits, crucial for quantum correlations and capturing dependencies between data points.
+Reason: Introduces non-local operations that classical systems cannot easily replicate.
+Order: Positioned between rotation layers to alternate between local (rotations) and global (entanglement) operations, increasing expressiveness.
+
+9. Second Layer of Ry Gates:
+Purpose: Introduces additional tunable parameters to refine the quantum state after entanglement.
+Reason: Ensures sufficient parameterization after introducing correlations through entanglement.
+Order: After the first entanglement layer, allowing the circuit to adjust the correlated quantum states.
+
+10. Final Layer of Controlled-X Gates (CX):
+Purpose: Strengthens the entanglement across the system.
+Reason: A second entanglement layer helps capture deeper correlations and interdependencies.
+Order: Positioned after additional parameterization to optimize the resulting entangled state.
+
+11. Optional Final Rotations (Ry):
+Purpose: Refines the state preparation further before measurement.
+Reason: Allows additional tunability after all entanglements are introduced.
+Order: As the final step, these gates act as a fine-tuning mechanism.
+
 
 
 ---
 
 ## 3. Dataset and Preprocessing
-Data Description
-The dataset comprises high-energy physics event data used for classification tasks. The input features are encoded using the quantum circuits, and the labels correspond to event categories.
+#### Data Description
+The dataset is the MNIST handwritten digits comprises of Hand written digits used for classification tasks. The input features are encoded and the labels correspond to event categories.
 
-Preprocessing Steps
+#### Preprocessing Steps
 
 Data normalization to ensure compatibility with quantum encoding.
 Feature scaling to match the range required for Rx, Ry, and Rz rotations.
 Dimensionality reduction for dense encoding techniques.
-Data Visualization
+#### Data Visualization
 Preprocessing techniques were validated through feature histograms and scatter plots to confirm appropriate scaling and normalization.
+
+### NOTE:
+this dataset already has been preprocessed. We are using data already preprocessed for us so you will not find preprocessing steps inside this notebook itself.
 
 ---
 
 ## 4. Results
-Actual QPU or Simulations
 All experiments were conducted using quantum simulations on classical hardware.
 
 #### Key Findings
@@ -114,10 +163,38 @@ Phase encoding demonstrated efficiency in pattern recognition tasks.
 ##### 2. Hyperparameter Tuning:
 Adding more layers and neurons in the feed-forward network significantly improved accuracy.
 Increasing qubits for Keys, Values, and Queries in the attention layer enhanced the model's ability to encode spatial and semantic information, improving overall performance.
+Here are the specific hyperparameters we used for our results:
+transformer_dims = {
+    'Token_Dim': data_patched.shape[-2],
+    'Image_Dim': data_patched.shape[-1]
+}
+
+transformer_hyper = {
+    'n_layers': 2,
+    'FC_layers': [64, 32],
+    'head_dimension': 4,
+    'Embed_Dim': 32,
+    'ff_dim': 64
+}
+
+transformer_type = {
+    'classifying_type': 'max',
+    'pos_embedding': True
+}
+
 ##### Performance Metrics
 
-- Accuracy: Increased by 15% with optimized quantum encoding and hyperparameters.
+- Accuracy: Increased with optimized quantum encoding and hyperparameters.
+Resulted around a 93% accuracy for our training set (tr_accuracy) and around a 87% accuracy for our validation set (val_accuracy)
+  
+![Accuracy image](./Images/hybrid_accuracy.png)
 - Loss: Reduced significantly with denser neural networks.
+Resulted around a 0.3 loss for our training set (tr_accuracy) and around a 0.5 loss for our validation set (val_accuracy)
+
+![Loss image](./Images/hybrid_loss.png)
+
+This is a significant improvement to already existing HViT models but there still needs to be more research done to make it better than classical models.
+
 ## 5. Conclusion
 #### Summary
 The HViT project demonstrated the potential of integrating quantum machine learning with classical transformers for event classification. Quantum encodings and hybrid architectures improved model accuracy and efficiency.
@@ -133,68 +210,3 @@ Extend the approach to other domains requiring efficient data representation.
 ## 6. References
 - "Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics" [arXiv:2402.00776](https://arxiv.org/abs/2402.00776).
 - "Quantum Data Encoding: A Comparative Analysis of Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy" [arXiv:2311.10375](https://arxiv.org/pdf/2311.10375).
-
-
-
-
-
-
-
-
-
-# Hybrid Quantum Vision Transformer
-
-This project expands upon the research done in the paper Hybrid Quantum Vision Transformers for Event Classification in High Energy Physics (https://arxiv.org/abs/2402.00776).
-
-
-## Quantum encoding
-The specific changes are made to the quantum circuit located in the circuits.py file. These include 3 additional encoding functions. These additional encoding methids and their benefits are explained in the paper Quantum Data Encoding: A Comparative Analysis of
-Classical-to-Quantum Mapping Techniques and Their Impact on Machine Learning Accuracy (https://arxiv.org/pdf/2311.10375). An outline of these functions are explained below:
-
-The original encoding function (encode_token) consists of a Hadamard + Rx rotation on the input data and is 1 data point per qubit.
-This encoding:
-  1. Applies Hadamard to create superposition
-  2. Rotates around X-axis based on input data
-        
-  Example for 2 qubits with data [0.5, 1.0]:
-  |0⟩ --H--Rx(0.5)--
-  |0⟩ --H--Rx(1.0)--
-
-The first new encoding function is amplitude encoding (amplitude_encode), which maps data to quantum amplitudes. It consists of 2 data points per qubit. It is good for better preservation of data relationships and more precise control over the quantum state.
-This encoding:
-  1. Normalizes input data to ensure valid quantum state
-  2. Uses Rx and Ry rotations to encode data in amplitudes
-        
-  Example for 2 qubits with data [0.8, 0.6]:
-  Normalized = [0.8/√1.0, 0.6/√1.0]
-  |0⟩ --H--Rx(arcsin(0.8))--Ry(arccos(0.8))--
-  |0⟩ --H--Rx(arcsin(0.6))--Ry(arccos(0.6))--
-
-The second new ecnoding function is phase encoding (phase_encode), which encodes data in quantum phases. It consists of 1 data point per qubit. It is good for pattern recognition tasks and interference-based algorithms. Note that this is the encoding function being run in the current code.
-This encoding:
-  1. Creates superposition with Hadamard
-  2. Applies phase rotation based on data
-        
-  Example for 2 qubits with data [0.5, 1.0]:
-  |0⟩ --H--Rz(0.5)--
-  |0⟩ --H--Rz(1.0)--
-
-The third new encoding function is dense angle encoding (dense_angle_encode), whcih uses all three rotation angles. It consists of 3 data points per qubit. It is good for maximum data density, more efficient use of resources, and better for complex data patterns. 
-This encoding:
-  1. Applies all three rotation gates (Rx, Ry, Rz)
-  2. Enables encoding 3 data points per qubit
-        
-  Example for 1 qubit with data [0.5, 1.0, 0.7]:
-  |0⟩ --Rx(0.5)--Ry(1.0)--Rz(0.7)--
-
-
-## Hyperparameter tuning
-  1. increasing the complexity of the free forward Neural Network.
-  Adding more layers and adding more neurons to each layer in the Free Forward Neural Network part of the transformer model, increased the model's accuray and decreased the model loss significantly.
-
-NOTE: We also found that adding more neurons does not make the model better since it becomes prone to overfitting and does not perform well enough for testing data.
-
-  2. Increasing the number of q_bits to caluclate the Key, Value and Query in the attention layer.
-  THe code originally had only 2 qbits and we changed that making it similar to the paper cited above. Just making this simple change resulted in each attention head being able to encode the positioning and meaning of each of the pixel more accurately, increasing the overall performance of the model.
-
-## Circuit Changes
