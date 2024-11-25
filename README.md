@@ -63,6 +63,29 @@ This encoding:
   Example for 1 qubit with data [0.5, 1.0, 0.7]:
   |0⟩ --Rx(0.5)--Ry(1.0)--Rz(0.7)--
 
+
+#### Hyperparameters
+The hyperparameters of the HViT model were adjusted to optimize its performance and computational efficiency. The key differences are detailed below:
+1. Number of Transformer Layers (n_layers) : 2
+Impact: The transformer has fewer layers, reducing the model's depth. This simplifies the architecture and decreases computational requirements. A smaller number of layers can mitigate overfitting on smaller datasets while potentially speeding up training. However, this may reduce the model's capacity to learn highly complex patterns if the data requires deeper processing.
+2. Fully Connected (FC) Layers (FC_layers): [64, 32]
+Impact: The new neural network layers introduces two layers with 64 and 32 neurons, respectively, significantly increasing the representational power and enabling the classifier to better map learned features to the target space. This change likely improves the model's downstream performance, especially for more complex tasks like multi-class classification.
+3. Attention Head Dimension (head_dimension): 4
+Impact: This parameter controls the size of each attention head in the multi-head attention mechanism. Reducing the head dimension halves the size of the subspace for each attention head. While smaller heads reduce computational cost, they might also slightly reduce the granularity of feature extraction. This adjustment strikes a balance between performance and efficiency, ensuring the model can scale to larger datasets or more complex tasks without excessive computational overhead.
+4. Embedding Dimension (Embed_Dim): 32
+Impact: This parameter remains constant, maintaining the size of the token embeddings. The embedding size is critical for capturing sufficient information from each token without excessively increasing computational cost.
+5. Feed-Forward Dimension (ff_dim): 64
+Impact: The feed-forward network within each transformer layer retains its hidden layer size. This parameter ensures that the transformer's capacity to learn intermediate representations remains unchanged.
+6. Classifying Type (classifying_type): 'max'
+Impact: The aggregation method for token outputs remains unchanged. Max pooling continues to focus on the most prominent features across tokens for classification. From our tests this seems to be the best pooling method.
+7. Positional Embedding (pos_embedding): True
+Impact: Positional encoding remains enabled, allowing the transformer to account for spatial relationships among patches.
+
+#### Quantum Circuits
+In this code we introduce a 8 qbit quantum circuit used to calculate the Key, Value and Query for each attention head. This is the basics of a hybrid transformer model and instead of doing matrix multiplication we are able to speed up this process via Superposition and Parallelism. Here are the quantum circuits that we used to calucalte the Key, Value and Query of our attention mechanism:
+
+
+
 ---
 
 ## 3. Dataset and Preprocessing
